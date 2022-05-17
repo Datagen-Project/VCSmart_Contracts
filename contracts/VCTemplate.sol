@@ -60,7 +60,7 @@ contract VCTemplate is Ownable, ReentrancyGuard {
 	}
 
   /* vc wallet update, only owner of the vc wallet can do it. */
-  function setCompanyWallet(address _vcWallet) public VcWalletOwner {
+  function setVcWallet(address _vcWallet) public VcWalletOwner {
     vcWallet = _vcWallet;
     emit SetVcWalletAddress(msg.sender, _vcWallet);
   }
