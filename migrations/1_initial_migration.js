@@ -1,5 +1,9 @@
-const Migrations = artifacts.require("Migrations");
+const DataGen = artifacts.require(".DataGen.sol");
+const VCTemplate = artifacts.require(".VCTemplate.sol");
 
-module.exports = function (deployer) {
-  deployer.deploy(Migrations);
+const vcWallet = "";
+
+module.exports = async function (deployer) {
+  await deployer.deploy(DataGen);
+  await deployer.deploy(VCTemplate, DataGen.address, vcWallet);
 };
