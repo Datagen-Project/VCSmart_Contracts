@@ -13,13 +13,9 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   using SafeERC20 for IERC20;
   
   /* First release tokens */
-  uint256 public constant frAmount = 750000 * (10**18);
+  uint256 public constant amount = 240000 * (10**18);
   /* First release start time(21/12/2023 00:00:00) */
-  uint256 public constant frStart = 1703116800;
-  /* Second release tokens */
-  uint256 public constant srAmount = 750000 * (10**18);
-  /* Second release start time */
-  uint256 public constant srStart = 1734220800;
+  uint256 public constant releaseStart = 1652799484;
   /* the address of the token contract */
   IERC20 public dataGen;
   /* the vc wallet where distribute the #DG */
@@ -35,7 +31,7 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   event SetVcWalletAddress(address indexed user, address indexed vcWallet); 
 
   modifier firstRelease() {
-    require(block.timestamp >= frStart, "Pool is Still locked.");
+    require(block.timestamp >= releaseStart, "Pool is Still locked.");
     _;
   }
 
@@ -47,24 +43,23 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   function releaseDataGen() public firstRelease nonReentrant {
     require(dataGen.balanceOf(address(this)) > 0, "Zero #DG left.");
 
-    if(block.timestamp < srStart ) {
-      uint256 epochs = block.timestamp.sub(frStart).div(30 * 24 * 3600).add(1);
+      uint256 epochs = block.timestamp.sub(releaseStart).div(30 * 24 * 3600).add(1);
       if (epochs > 24) epochs = 24;
 
+      // 1 - balance = 100.000
       uint256 balance = dataGen.balanceOf(address(this));
-      uint256 leftAmount = frAmount.sub(frAmount.mul(epochs).div(24));
+      
+      // 1 - leftAmount = 90.000
+      uint256 leftAmount = amount.sub(amount.mul(epochs).div(24));
 
-      require(balance.sub(srAmount) > leftAmount, "Already released.");
-      uint256 transferAmount = balance.sub(srAmount).sub(leftAmount);
+      require(balance > leftAmount, "Already released.");
+      uint256 transferAmount = balance.sub(leftAmount);
       if(transferAmount > 0) {
-        require(balance.sub(srAmount) >= transferAmount, "Wrong amount to transfer");
-        
         dataGen.safeTransfer(vcWallet, transferAmount);
-      }
     }
 	}
 
-  /* companyWallet update, only owner can do. */
+  /* vc wallet update, only owner of the vc wallet can do it. */
   function setCompanyWallet(address _vcWallet) public VcWalletOwner {
     vcWallet = _vcWallet;
     emit SetVcWalletAddress(msg.sender, _vcWallet);
