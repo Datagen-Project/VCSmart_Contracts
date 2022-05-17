@@ -12,9 +12,9 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
   
-  /* First release tokens */
+  /* Total tokens amount */
   uint256 public constant amount = 240000 * (10**18);
-  /* First release start time(21/12/2023 00:00:00) */
+  /* Release start time */
   uint256 public constant releaseStart = 1652799484;
   /* the address of the token contract */
   IERC20 public dataGen;
@@ -22,7 +22,7 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   address public vcWallet; 
 
 
-  /*  initialization, set the token address */
+  /*  initialization, set the token and vc addresses */
   constructor(IERC20 _dataGen, address _vcWallet) {
     dataGen = _dataGen;
     vcWallet = _vcWallet;
@@ -31,7 +31,7 @@ contract VCTemplate is Ownable, ReentrancyGuard {
   event SetVcWalletAddress(address indexed user, address indexed vcWallet); 
 
   modifier firstRelease() {
-    require(block.timestamp >= releaseStart, "Pool is Still locked.");
+    require(block.timestamp >= releaseStart, "Release is still locked.");
     _;
   }
 
@@ -46,10 +46,7 @@ contract VCTemplate is Ownable, ReentrancyGuard {
       uint256 epochs = block.timestamp.sub(releaseStart).div(30 * 24 * 3600).add(1);
       if (epochs > 24) epochs = 24;
 
-      // 1 - balance = 100.000
       uint256 balance = dataGen.balanceOf(address(this));
-      
-      // 1 - leftAmount = 90.000
       uint256 leftAmount = amount.sub(amount.mul(epochs).div(24));
 
       require(balance > leftAmount, "Already released.");
