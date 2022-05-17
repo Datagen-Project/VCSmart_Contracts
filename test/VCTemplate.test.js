@@ -59,5 +59,49 @@ contract("VCTemplate", accounts => {
             const finalBalanceOf4 = await this.DataGenToken.balanceOf(accounts[4]);
             finalBalanceOf4.toString().should.equal("240000000000000000000000");
         });
+        it.only("has to revert if there aeren't no more #DGs in the sc", async function() {
+            for (let i = 0; i < 24; i++) {
+                await this.contractVC.releaseDataGen({from: accounts[4]});
+                balanceOf4 = await this.DataGenToken.balanceOf(accounts[4]);
+    
+                console.log("Release %d -> %s",  (i+1), balanceOf4.toString()); 
+
+                time.increase(time.duration.days(30));
+            }
+
+            await expectRevert(
+                this.contractVC.releaseDataGen(),
+                "Zero #DG left."
+            );
+        });
     });
+    describe("change VcWallet", async function() {
+        it("has to revert if user aren't the old vc address", async function() {
+            await expectRevert(
+                this.contractVC.setVcWallet(accounts[5], {from:accounts[0]}),
+                "You are not the Vc owner"
+            );
+        });
+        it("has to transfer the vc ownership to an other wallet", async function() {
+            this.contractVC.setVcWallet(accounts[5], {from: accounts[4]});
+
+            const vcWallet = await this.contractVC.vcWallet();
+
+            vcWallet.toString().should.equal(accounts[5].toString());
+        });
+        it("has to transfer first release on a wallet than to another one", async function() {
+            await this.contractVC.releaseDataGen();
+            await this.contractVC.setVcWallet(accounts[5], {from: accounts[4]});
+
+            time.increase(time.duration.days(30));
+            await this.contractVC.releaseDataGen();
+
+            const balanceOf4 = await this.DataGenToken.balanceOf(accounts[4]);
+            const balanceOf5 = await this.DataGenToken.balanceOf(accounts[5]);
+
+            const checkString = balanceOf4.toString() + balanceOf5.toString();
+
+            checkString.should.equal("1000000000000000000000010000000000000000000000");
+        });
+    }); 
 });
