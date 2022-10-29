@@ -12,5 +12,4 @@
 .env.test.local
 .env.production.local
 .secret
-package.json
 package-lock.json
