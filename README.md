@@ -4,7 +4,7 @@ A repository of VC smart contracts.
 
 ## Getting started
 
-You could clone the repository and try the smart contracts in your local machine, you need also to install [truffle](https://trufflesuite.com/truffle/) to interact with the code.
+You can clone the repository and try the smart contracts in your local machine, you need also to install [truffle](https://trufflesuite.com/truffle/) to interact with the code.
 
 From your comand line:
 ```bash
